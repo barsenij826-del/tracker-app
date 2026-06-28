@@ -128,44 +128,68 @@
     </div>
 
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Развернуть на весь экран телефона
+       // Инициализация Telegram WebApp
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
 
-        function switchPage(pageId, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            btn.classList.add('active');
-        }
+// СЮДА ВСТАВЬ СВОЙ URL ВЕБ-ПРИЛОЖЕНИЯ GOOGLE APPS SCRIPT
+const API_URL = "https://script.google.com/macros/s/AKfycbwrKFtabL8kv4dEExvThci9t7A1aUCZtkprALT9Q-TI4fsQ52ZNtjQO7IDB9nQ0Zus/exec";
 
-        function toggleHabit(btn, habitName) {
-            btn.classList.toggle('done');
-            if(btn.classList.contains('done')) {
-                btn.innerText = "Готово ✨";
-                // Передаем данные обратно в бота
-                tg.sendData(JSON.stringify({type: "habit", name: habitName, status: "Выполнено"}));
-            } else {
-                btn.innerText = "Выполнить";
-            }
-        }
+function switchPage(pageId, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    btn.classList.add('active');
+}
 
-        // Тестовый график расходов (заглушка, на следующем шаге свяжем с гугл таблицей)
+function toggleHabit(btn, habitName) {
+    btn.classList.toggle('done');
+    if(btn.classList.contains('done')) {
+        btn.innerText = "Готово ✨";
+        tg.sendData(JSON.stringify({type: "habit", name: habitName, status: "Выполнено"}));
+    } else {
+        btn.innerText = "Выполнить";
+    }
+}
+
+// Переменная для графика, чтобы обновлять его динамически
+let myChart = null;
+
+// Функция загрузки реальных данных из Google Таблицы
+async function loadData() {
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        // Отображаем баланс (делаем модуль, если он отрицательный, или просто выводим)
+        document.getElementById('total-balance').innerText = data.balance + " ₽";
+
+        // Рисуем график реальными данными
         const ctx = document.getElementById('financeChart').getContext('2d');
-        new Chart(ctx, {
+        
+        if (myChart) { myChart.destroy(); } // Уничтожаем старый, если был
+
+        myChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Кафе', 'Продукты', 'Транспорт', 'Другое'],
+                labels: data.chartData.labels.length ? data.chartData.labels : ['Нет расходов'],
                 datasets: [{
-                    data: [600, 200, 500, 300],
-                    backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
+                    data: data.chartData.values.length ? data.chartData.values : [1],
+                    backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#32cd32']
                 }]
             },
             options: { responsive: true }
         });
-        
-        document.getElementById('total-balance').innerText = "12 450 ₽";
+
+    } catch (error) {
+        document.getElementById('total-balance').innerText = "Ошибка загрузки";
+        console.error(error);
+    }
+}
+
+// Запускаем загрузку данных при старте приложения
+loadData();
     </script>
 </body>
 </html>
