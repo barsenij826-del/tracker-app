@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный Трекер</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #f5f5f5);
+            color: var(--tg-theme-text-color, #222);
+            margin: 0;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: var(--tg-theme-hint-color, #777);
+        }
+        .balance {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--tg-theme-button-color, #248bed);
+        }
+        /* Сетка для трекера привычек */
+        .habits-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .habit-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--tg-theme-bg-color, #fafafa);
+            border-radius: 8px;
+        }
+        .habit-btn {
+            background: #e0e0e0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .habit-btn.done {
+            background: #4caf50;
+            color: white;
+        }
+        /* Нижняя навигация */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--tg-theme-secondary-bg-color, #ffffff);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .nav-item {
+            font-size: 12px;
+            background: none;
+            border: none;
+            color: var(--tg-theme-hint-color, #777);
+            cursor: pointer;
+        }
+        .nav-item.active {
+            color: var(--tg-theme-button-color, #248bed);
+            font-weight: bold;
+        }
+        .page { display: none; }
+        .page.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="finance-page" class="page active">
+        <div class="card">
+            <h2>Текущий баланс</h2>
+            <div class="balance" id="total-balance">Загрузка...</div>
+        </div>
+
+        <div class="card">
+            <h2>Аналитика расходов</h2>
+            <canvas id="financeChart" width="100" height="100"></canvas>
+        </div>
+    </div>
+
+    <div id="habits-page" class="page">
+        <div class="card">
+            <h2>Трекер привычек на сегодня</h2>
+            <div class="habits-grid">
+                <div class="habit-row">
+                    <span>Медитация</span>
+                    <button class="habit-btn" onclick="toggleHabit(this, 'Медитация')">Выполнить</button>
+                </div>
+                <div class="habit-row">
+                    <span>Спорт / Тренировка</span>
+                    <button class="habit-btn" onclick="toggleHabit(this, 'Спорт')">Выполнить</button>
+                </div>
+                <div class="habit-row">
+                    <span>Чтение книги</span>
+                    <button class="habit-btn" onclick="toggleHabit(this, 'Чтение')">Выполнить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <button class="nav-item active" onclick="switchPage('finance-page', this)">📊 Финансы</button>
+        <button class="nav-item" onclick="switchPage('habits-page', this)">✅ Привычки</button>
+    </div>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // Развернуть на весь экран телефона
+
+        function switchPage(pageId, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function toggleHabit(btn, habitName) {
+            btn.classList.toggle('done');
+            if(btn.classList.contains('done')) {
+                btn.innerText = "Готово ✨";
+                // Передаем данные обратно в бота
+                tg.sendData(JSON.stringify({type: "habit", name: habitName, status: "Выполнено"}));
+            } else {
+                btn.innerText = "Выполнить";
+            }
+        }
+
+        // Тестовый график расходов (заглушка, на следующем шаге свяжем с гугл таблицей)
+        const ctx = document.getElementById('financeChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Кафе', 'Продукты', 'Транспорт', 'Другое'],
+                datasets: [{
+                    data: [600, 200, 500, 300],
+                    backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56']
+                }]
+            },
+            options: { responsive: true }
+        });
+        
+        document.getElementById('total-balance').innerText = "12 450 ₽";
+    </script>
+</body>
+</html>
