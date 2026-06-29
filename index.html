@@ -180,7 +180,7 @@ async function loadData() {
         // Рисуем график реальными данными
         const ctx = document.getElementById('financeChart').getContext('2d');
         
-        if (myChart) { myChart.destroy(); } // Уничтожаем старый график, если он был
+      if (myChart) { myChart.destroy(); } // Уничтожаем старый график, если он был
 
         myChart = new Chart(ctx, {
             type: 'doughnut',
@@ -194,27 +194,14 @@ async function loadData() {
             options: { responsive: true }
         });
 
-   options: { responsive: true }
-        });
-
     } catch (error) {
         document.getElementById('total-balance').innerText = "Ошибка загрузки";
         console.error(error);
     }
 }
 
-// ---- ДОБАВЬ ЭТУ СТРОКУ СЮДА, ЧТОБЫ ВСЁ ЗАПУСТИЛОСЬ ----
+// Запускаем загрузку данных при старте
 loadData();
 </script>
-}
-        } catch (error) {
-        document.getElementById('total-balance').innerText = "Ошибка загрузки";
-        console.error(error);
-    }
-}
-
-// ---- ДОБАВЬ ЭТУ СТРОКУ СЮДА, ЧТОБЫ ВСЁ ЗАПУСТИЛОСЬ ----
-loadData();
-    </script>
 </body>
 </html>
