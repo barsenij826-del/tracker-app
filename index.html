@@ -194,11 +194,27 @@ async function loadData() {
             options: { responsive: true }
         });
 
+   options: { responsive: true }
+        });
+
     } catch (error) {
         document.getElementById('total-balance').innerText = "Ошибка загрузки";
         console.error(error);
     }
 }
+
+// ---- ДОБАВЬ ЭТУ СТРОКУ СЮДА, ЧТОБЫ ВСЁ ЗАПУСТИЛОСЬ ----
+loadData();
+</script>
+}
+        } catch (error) {
+        document.getElementById('total-balance').innerText = "Ошибка загрузки";
+        console.error(error);
+    }
+}
+
+// ---- ДОБАВЬ ЭТУ СТРОКУ СЮДА, ЧТОБЫ ВСЁ ЗАПУСТИЛОСЬ ----
+loadData();
     </script>
 </body>
 </html>
