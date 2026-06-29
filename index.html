@@ -157,18 +157,30 @@ function toggleHabit(btn, habitName) {
 let myChart = null;
 
 // Функция загрузки реальных данных из Google Таблицы
+// Функция загрузки реальных данных из Google Таблицы
 async function loadData() {
     try {
-        const response = await fetch(API_URL);
+        // Безопасно вытаскиваем твой ID пользователя прямо из Телеграма
+        const initDataUnsafe = tg.initDataUnsafe;
+        const userId = initDataUnsafe.user && initDataUnsafe.user.id ? initDataUnsafe.user.id : "";
+
+        // Передаем твой user_id в запросе к нашей гугл-таблице
+        const response = await fetch(`${API_URL}?user_id=${userId}`);
         const data = await response.json();
 
-        // Отображаем баланс (делаем модуль, если он отрицательный, или просто выводим)
+        // Если бэкенд вернул ошибку авторизации
+        if (data.error) {
+            document.getElementById('total-balance').innerText = "Доступ ограничен 🔒";
+            return;
+        }
+
+        // Отображаем реальный баланс
         document.getElementById('total-balance').innerText = data.balance + " ₽";
 
         // Рисуем график реальными данными
         const ctx = document.getElementById('financeChart').getContext('2d');
         
-        if (myChart) { myChart.destroy(); } // Уничтожаем старый, если был
+        if (myChart) { myChart.destroy(); } // Уничтожаем старый график, если он был
 
         myChart = new Chart(ctx, {
             type: 'doughnut',
@@ -187,9 +199,6 @@ async function loadData() {
         console.error(error);
     }
 }
-
-// Запускаем загрузку данных при старте приложения
-loadData();
     </script>
 </body>
 </html>
